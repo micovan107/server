@@ -11,7 +11,7 @@ jobs:
     - name: Download Mindustry Server
       run: |
         mkdir server && cd server
-        wget -O server.jar https://github.com/Anuke/Mindustry/releases/download/v146/server-release-v146.jar
+        wget -O server.jar https://github.com/Anuke/Mindustry/releases/download/v146/server-release-v146.2.jar
 
     - name: Install Playit.gg
       run: |
