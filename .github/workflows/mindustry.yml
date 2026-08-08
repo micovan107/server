@@ -13,15 +13,13 @@ jobs:
         mkdir server && cd server
         wget -O server.jar https://github.com/Anuken/Mindustry/releases/latest/download/server-release.jar
 
-    - name: Install Playit.gg
+    - name: Download Playit Binary
       run: |
-        curl -SsL https://playit-cloud.github.io/ppa/key.gpg | sudo apt-key add -
-        sudo curl -SsL -o /etc/apt/sources.list.d/playit-cloud.list https://playit-cloud.github.io/ppa/playit-cloud.list
-        sudo apt update
-        sudo apt install playit -y
+        wget -O playit https://github.com/playit-cloud/playit-agentplus/releases/latest/download/playit-linux-amd64
+        chmod +x playit
 
     - name: Run Mindustry & Playit
       run: |
-        playit &
+        sudo ./playit &
         cd server
         java -jar server.jar
