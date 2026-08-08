@@ -18,9 +18,9 @@ jobs:
         wget -O playit https://github.com/playit-cloud/playit-agent/releases/latest/download/playit-linux-amd64
         chmod +x playit
 
-    - name: Run Mindustry & Playit
+    - name: Run Playit & Show Code
       run: |
-        sudo ./playit > playit.log 2>&1 &
+        ./playit --claim-code > playit.log 2>&1 &
         sleep 5
         cat playit.log
         cd server
