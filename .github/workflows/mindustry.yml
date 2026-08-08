@@ -13,15 +13,14 @@ jobs:
         mkdir server && cd server
         wget -O server.jar https://github.com/Anuken/Mindustry/releases/latest/download/server-release.jar
 
-    - name: Download Playit Binary
+    - name: Download Playit Old Version
       run: |
-        wget -O playit https://github.com/playit-cloud/playit-agent/releases/latest/download/playit-linux-amd64
+        wget -O playit https://github.com/playit-cloud/playit-agent/releases/download/v0.15.26/playit-linux-amd64
         chmod +x playit
 
     - name: Run Playit & Show Code
       run: |
-        ./playit --claim-code > playit.log 2>&1 &
+        ./playit &
         sleep 5
-        cat playit.log
         cd server
         java -jar server.jar
