@@ -1,0 +1,27 @@
+name: Mindustry Server
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-server:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Download Mindustry Server
+      run: |
+        mkdir server && cd server
+        wget -O server.jar https://github.com/Anuke/Mindustry/releases/download/v146/server-release-v146.jar
+
+    - name: Install Playit.gg
+      run: |
+        curl -SsL https://playit-cloud.github.io/ppa/key.gpg | sudo apt-key add -
+        sudo curl -SsL -o /etc/apt/sources.list.d/playit-cloud.list https://playit-cloud.github.io/ppa/playit-cloud.list
+        sudo apt update
+        sudo apt install playit -y
+
+    - name: Run Mindustry & Playit
+      run: |
+        playit &
+        cd server
+        java -jar server.jar
