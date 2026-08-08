@@ -20,6 +20,7 @@ jobs:
 
     - name: Run Mindustry & Playit
       run: |
-        sudo ./playit &
+        sudo ./playit setup --claim &
+        sleep 3
         cd server
         java -jar server.jar
