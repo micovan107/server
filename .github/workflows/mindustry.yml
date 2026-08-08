@@ -15,7 +15,7 @@ jobs:
 
     - name: Download Playit Binary
       run: |
-        wget -O playit https://github.com/playit-cloud/playit-agentplus/releases/latest/download/playit-linux-amd64
+        wget -O playit https://github.com/playit-cloud/playit-agent/releases/latest/download/playit-linux-amd64
         chmod +x playit
 
     - name: Run Mindustry & Playit
