@@ -18,9 +18,11 @@ jobs:
         wget -O playit https://github.com/playit-cloud/playit-agent/releases/download/v0.15.26/playit-linux-amd64
         chmod +x playit
 
-    - name: Run Playit & Show Code
+    - name: Run Playit & Mindustry Server
       run: |
         ./playit &
         sleep 5
         cd server
-        java -jar server.jar
+        # Tạo map mặc định tên 'world' chế độ survival rồi host luôn
+        java -jar server.jar config autosave true &
+        java -jar server.jar host Ancient_Caldera survival
