@@ -19,10 +19,23 @@ jobs:
         chmod +x playit
 
     - name: Run Playit & Mindustry Server
+      env:
+        PLAYIT_SECRET_KEY: ${{ secrets.PLAYIT_SECRET_KEY }}
       run: |
-        ./playit &
+        if [ -n "$PLAYIT_SECRET_KEY" ]; then
+          echo "=> Dang chay Playit voi Secret Key co dinh..."
+          ./playit --secret $PLAYIT_SECRET_KEY &
+        else
+          echo "=> Chua co Secret Key, dang chay Playit tao Agent moi..."
+          ./playit &
+          sleep 3
+          echo "=========================================="
+          echo "MÃ SECRET KEY CỦA BẠN DƯỚI ĐÂY (COPY LƯU VÀO GITHUB SECRETS):"
+          cat playit.toml || cat ~/.config/playit/playit.toml || true
+          echo "=========================================="
+        fi
+
         sleep 5
         cd server
-        # Tạo map mặc định tên 'world' chế độ survival rồi host luôn
         java -jar server.jar config autosave true &
         java -jar server.jar host Ancient_Caldera survival
