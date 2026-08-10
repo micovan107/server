@@ -29,9 +29,13 @@ jobs:
         ./bore local 6567 --to bore.pub > bore.log 2>&1 &
         sleep 5
 
+        # Lay IP so IPv4 cua bore.pub
+        BORE_IP=$(dig +short bore.pub | tail -n1)
+        PORT=$(grep -o 'bore.pub:[0-9]*' bore.log | cut -d: -f2)
+
         echo "=========================================="
-        echo "ĐỊA CHỈ IP ĐỂ VÀO GAME MINDUSTRY:"
-        grep -o 'bore.pub:[0-9]*' bore.log || cat bore.log
+        echo "ĐỊA CHỈ IP SỐ ĐỂ VÀO GAME MINDUSTRY:"
+        echo "$BORE_IP:$PORT"
         echo "=========================================="
 
         wait
