@@ -13,39 +13,40 @@ jobs:
         mkdir server && cd server
         wget -O server.jar https://github.com/Anuken/Mindustry/releases/latest/download/server-release.jar
 
-    - name: Install LocalXpose
-      run: |
-        wget -O loclx.zip https://api.localxpose.io/api/v2/downloads/loclx-linux-amd64.zip
-        unzip loclx.zip
-        chmod +x loclx
-
-    - name: Run Mindustry & UDP Tunnel
+    - name: Setup Ngrok
       env:
-        LOCAXPOSE_TOKEN: ${{ secrets.LOCAXPOSE_TOKEN }}
+        NGROK_AUTHTOKEN: ${{ secrets.NGROK_AUTHTOKEN }}
+      run: |
+        wget -O ngrok.tgz https://bin.equinox.io/c/bMR2AQHvNVb/ngrok-v3-stable-linux-amd64.tgz
+        tar -xf ngrok.tgz
+        ./ngrok config add-authtoken $NGROK_AUTHTOKEN
+
+    - name: Run Mindustry & Ngrok
       run: |
         cd server
         java -jar server.jar config autosave true &
         java -jar server.jar host Ancient_Caldera survival &
         cd ..
 
-        # Mở tunnel UDP kèm token
-        ./loclx tunnel udp --to 127.0.0.1:6567 --token $LOCAXPOSE_TOKEN > loclx.log 2>&1 &
-        sleep 12
+        ./ngrok tcp 6567 > ngrok.log 2>&1 &
+        sleep 6
 
-        echo "=========================================="
-        echo "LOG CHI TIẾT CỦA LOCALXPOSE:"
-        cat loclx.log
-        echo "=========================================="
+        # Lay Endpoint TCP
+        URL=$(curl -s http://localhost:4040/api/tunnels | grep -o '"public_url":"tcp://[^"]*' | sed 's/"public_url":"tcp:\/\///')
 
-        ENDPOINT=$(grep -o '[a-z0-9\.-]*\.loclx\.io:[0-9]*' loclx.log | head -n1)
-        
-        if [ -n "$ENDPOINT" ]; then
-          DOMAIN=$(echo $ENDPOINT | cut -d: -f1)
-          PORT=$(echo $ENDPOINT | cut -d: -f2)
+        if [ -n "$URL" ]; then
+          DOMAIN=$(echo $URL | cut -d: -f1)
+          PORT=$(echo $URL | cut -d: -f2)
           IP_SO=$(getent ahosts $DOMAIN | awk '{print $1}' | head -n1)
 
           echo "=========================================="
-          echo "ĐỊA CHỈ IP SỐ ĐỂ VÀO GAME: $IP_SO:$PORT"
+          echo "ĐỊA CHỈ IP SỐ ĐỂ VÀO GAME MINDUSTRY:"
+          echo "$IP_SO:$PORT"
+          echo "=========================================="
+        else
+          echo "=========================================="
+          echo "LỖI NGROK:"
+          cat ngrok.log
           echo "=========================================="
         fi
 
