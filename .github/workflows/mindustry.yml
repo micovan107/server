@@ -15,8 +15,8 @@ jobs:
 
     - name: Install LocalXpose
       run: |
-        wget -O loclx.tar.gz https://github.com/localxpose/localxpose-cli/releases/latest/download/loclx-linux-amd64.tar.gz
-        tar -xf loclx.tar.gz
+        wget -O loclx.zip https://api.localxpose.io/api/v2/downloads/loclx-linux-amd64.zip
+        unzip loclx.zip
         chmod +x loclx
 
     - name: Run Mindustry & UDP Tunnel
