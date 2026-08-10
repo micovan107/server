@@ -13,42 +13,42 @@ jobs:
         mkdir server && cd server
         wget -O server.jar https://github.com/Anuken/Mindustry/releases/latest/download/server-release.jar
 
-    - name: Setup Ngrok
-      env:
-        NGROK_AUTHTOKEN: ${{ secrets.NGROK_AUTHTOKEN }}
+    - name: Download FRP Client
       run: |
-        curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
-        echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
-        sudo apt update && sudo apt install ngrok -y
-        ngrok config add-authtoken $NGROK_AUTHTOKEN
+        wget https://github.com/fatedier/frp/releases/download/v0.58.0/frp_0.58.0_linux_amd64.tar.gz
+        tar -xf frp_0.58.0_linux_amd64.tar.gz
+        mv frp_0.58.0_linux_amd64 frp
 
-    - name: Run Mindustry & Ngrok
+    - name: Run Mindustry & FRP UDP Tunnel
       run: |
         cd server
         java -jar server.jar config autosave true &
         java -jar server.jar host Ancient_Caldera survival &
         cd ..
 
-        ngrok tcp 6567 > ngrok.log 2>&1 &
+        # Tao port ngau nhien va file config FRP
+        RANDOM_PORT=$((RANDOM % 10000 + 20000))
+        cat <<EOF > frpc.toml
+        serverAddr = "free.vps.vc"
+        serverPort = 7000
+
+        [[proxies]]
+        name = "mindustry-udp-$RANDOM_PORT"
+        type = "udp"
+        localIP = "127.0.0.1"
+        localPort = 6567
+        remotePort = $RANDOM_PORT
+        EOF
+
+        ./frp/frpc -c frpc.toml > frp.log 2>&1 &
         sleep 6
 
-        # Lay Endpoint TCP
-        URL=$(curl -s http://localhost:4040/api/tunnels | grep -o '"public_url":"tcp://[^"]*' | sed 's/"public_url":"tcp:\/\///')
+        # Lay IP so IPv4 cua server free.vps.vc
+        FRP_IP=$(getent ahosts free.vps.vc | awk '{print $1}' | head -n1)
 
-        if [ -n "$URL" ]; then
-          DOMAIN=$(echo $URL | cut -d: -f1)
-          PORT=$(echo $URL | cut -d: -f2)
-          IP_SO=$(getent ahosts $DOMAIN | awk '{print $1}' | head -n1)
-
-          echo "=========================================="
-          echo "ĐỊA CHỈ IP SỐ ĐỂ VÀO GAME MINDUSTRY:"
-          echo "$IP_SO:$PORT"
-          echo "=========================================="
-        else
-          echo "=========================================="
-          echo "LỖI NGROK:"
-          cat ngrok.log
-          echo "=========================================="
-        fi
+        echo "=========================================="
+        echo "ĐỊA CHỈ IP SỐ UDP ĐỂ VÀO GAME MINDUSTRY:"
+        echo "$FRP_IP:$RANDOM_PORT"
+        echo "=========================================="
 
         wait
