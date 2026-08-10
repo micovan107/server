@@ -13,23 +13,16 @@ jobs:
         mkdir server && cd server
         wget -O server.jar https://github.com/Anuken/Mindustry/releases/latest/download/server-release.jar
 
-    - name: Install & Setup Ngrok
-      env:
-        NGROK_AUTHTOKEN: ${{ secrets.NGROK_AUTHTOKEN }}
+    - name: Run Pinggy Tunnel & Mindustry Server
       run: |
-        curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
-        echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
-        sudo apt update && sudo apt install ngrok -y
-        ngrok config add-authtoken $NGROK_AUTHTOKEN
-
-    - name: Run Ngrok & Mindustry Server
-      run: |
-        ngrok tcp 6567 &
+        # Mo tunnel TCP qua Pinggy qua SSH
+        ssh -o StrictHostKeyChecking=no -p 443 -R 0:localhost:6567 tcp@a.pinggy.io > pinggy.log 2>&1 &
+        
         sleep 5
         
         echo "=========================================="
         echo "ĐỊA CHỈ IP ĐỂ VÀO GAME MINDUSTRY:"
-        curl -s http://localhost:4040/api/tunnels | grep -o '"public_url":"[^"]*' | sed 's/"public_url":"tcp:\/\///'
+        cat pinggy.log | grep -o 'a.pinggy.io:[0-9]*' || cat pinggy.log
         echo "=========================================="
 
         cd server
