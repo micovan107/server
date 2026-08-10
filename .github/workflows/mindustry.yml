@@ -23,30 +23,33 @@ jobs:
       env:
         LOCAXPOSE_TOKEN: ${{ secrets.LOCAXPOSE_TOKEN }}
       run: |
-        # Đăng nhập token
-        ./loclx account login $LOCAXPOSE_TOKEN
-        
         # Chạy Mindustry server
         cd server
         java -jar server.jar config autosave true &
         java -jar server.jar host Ancient_Caldera survival &
         cd ..
 
-        # Mở tunnel UDP chuẩn cho Mindustry
-        ./loclx tunnel udp --to 127.0.0.1:6567 > loclx.log 2>&1 &
+        # Mở tunnel UDP kèm token trực tiếp
+        ./loclx tunnel udp --to 127.0.0.1:6567 --token $LOCAXPOSE_TOKEN > loclx.log 2>&1 &
         sleep 8
 
-        # Lấy domain/IP UDP
+        # Lấy endpoint và IP
         ENDPOINT=$(grep -o '[a-z0-9\.-]*\.loclx\.io:[0-9]*' loclx.log | head -n1)
         
-        # Đổi domain ra IP số cho Mindustry Mobile ăn liền
-        DOMAIN=$(echo $ENDPOINT | cut -d: -f1)
-        PORT=$(echo $ENDPOINT | cut -d: -f2)
-        IP_SO=$(dig +short $DOMAIN | tail -n1)
+        if [ -n "$ENDPOINT" ]; then
+          DOMAIN=$(echo $ENDPOINT | cut -d: -f1)
+          PORT=$(echo $ENDPOINT | cut -d: -f2)
+          IP_SO=$(getent ahosts $DOMAIN | awk '{print $1}' | head -n1)
 
-        echo "=========================================="
-        echo "TÊN MIỀN UDP: $ENDPOINT"
-        echo "ĐỊA CHỈ IP SỐ ĐỂ VÀO GAME: $IP_SO:$PORT"
-        echo "=========================================="
+          echo "=========================================="
+          echo "TÊN MIỀN UDP: $ENDPOINT"
+          echo "ĐỊA CHỈ IP SỐ ĐỂ VÀO GAME: $IP_SO:$PORT"
+          echo "=========================================="
+        else
+          echo "=========================================="
+          echo "LỖI KẾT NỐI LOCLX:"
+          cat loclx.log
+          echo "=========================================="
+        fi
 
         wait
