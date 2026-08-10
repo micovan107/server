@@ -27,7 +27,7 @@ jobs:
         cd ..
 
         # Tao port ngau nhien va file config FRP
-        RANDOM_PORT=$((RANDOM % 10000 + 20000))
+        RANDOM_PORT=$((RANDOM % 20000 + 30000))
         cat <<EOF > frpc.toml
         serverAddr = "free.vps.vc"
         serverPort = 7000
@@ -41,11 +41,14 @@ jobs:
         EOF
 
         ./frp/frpc -c frpc.toml > frp.log 2>&1 &
-        sleep 6
+        sleep 8
 
         # Lay IP so IPv4 cua server free.vps.vc
         FRP_IP=$(getent ahosts free.vps.vc | awk '{print $1}' | head -n1)
 
+        echo "=========================================="
+        echo "LOG CHI TIẾT FRP:"
+        cat frp.log
         echo "=========================================="
         echo "ĐỊA CHỈ IP SỐ UDP ĐỂ VÀO GAME MINDUSTRY:"
         echo "$FRP_IP:$RANDOM_PORT"
