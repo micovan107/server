@@ -13,29 +13,40 @@ jobs:
         mkdir server && cd server
         wget -O server.jar https://github.com/Anuken/Mindustry/releases/latest/download/server-release.jar
 
-    - name: Download Bore
+    - name: Install LocalXpose
       run: |
-        wget https://github.com/ekzhang/bore/releases/download/v0.5.0/bore-v0.5.0-x86_64-unknown-linux-musl.tar.gz
-        tar -xf bore-v0.5.0-x86_64-unknown-linux-musl.tar.gz
-        chmod +x bore
+        wget -O loclx.tar.gz https://github.com/localxpose/localxpose-cli/releases/latest/download/loclx-linux-amd64.tar.gz
+        tar -xf loclx.tar.gz
+        chmod +x loclx
 
-    - name: Run Mindustry & Bore Tunnel
+    - name: Run Mindustry & UDP Tunnel
+      env:
+        LOCAXPOSE_TOKEN: ${{ secrets.LOCAXPOSE_TOKEN }}
       run: |
+        # Đăng nhập token
+        ./loclx account login $LOCAXPOSE_TOKEN
+        
+        # Chạy Mindustry server
         cd server
         java -jar server.jar config autosave true &
         java -jar server.jar host Ancient_Caldera survival &
         cd ..
 
-        ./bore local 6567 --to bore.pub > bore.log 2>&1 &
-        sleep 5
+        # Mở tunnel UDP chuẩn cho Mindustry
+        ./loclx tunnel udp --to 127.0.0.1:6567 > loclx.log 2>&1 &
+        sleep 8
 
-        # Lay IP so IPv4 cua bore.pub
-        BORE_IP=$(dig +short bore.pub | tail -n1)
-        PORT=$(grep -o 'bore.pub:[0-9]*' bore.log | cut -d: -f2)
+        # Lấy domain/IP UDP
+        ENDPOINT=$(grep -o '[a-z0-9\.-]*\.loclx\.io:[0-9]*' loclx.log | head -n1)
+        
+        # Đổi domain ra IP số cho Mindustry Mobile ăn liền
+        DOMAIN=$(echo $ENDPOINT | cut -d: -f1)
+        PORT=$(echo $ENDPOINT | cut -d: -f2)
+        IP_SO=$(dig +short $DOMAIN | tail -n1)
 
         echo "=========================================="
-        echo "ĐỊA CHỈ IP SỐ ĐỂ VÀO GAME MINDUSTRY:"
-        echo "$BORE_IP:$PORT"
+        echo "TÊN MIỀN UDP: $ENDPOINT"
+        echo "ĐỊA CHỈ IP SỐ ĐỂ VÀO GAME: $IP_SO:$PORT"
         echo "=========================================="
 
         wait
