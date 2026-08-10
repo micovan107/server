@@ -13,18 +13,23 @@ jobs:
         mkdir server && cd server
         wget -O server.jar https://github.com/Anuken/Mindustry/releases/latest/download/server-release.jar
 
-    - name: Run Pinggy Tunnel & Mindustry Server
+    - name: Run Mindustry & Pinggy Tunnel
       run: |
-        # Mo tunnel TCP qua Pinggy qua SSH
+        # Chay Mindustry server truoc
+        cd server
+        java -jar server.jar config autosave true &
+        java -jar server.jar host Ancient_Caldera survival &
+        
+        # Mo tunnel Pinggy
         ssh -o StrictHostKeyChecking=no -p 443 -R 0:localhost:6567 tcp@a.pinggy.io > pinggy.log 2>&1 &
         
-        sleep 5
+        # Doi 10 giây cho Pinggy bat tay va lay IP
+        sleep 15
         
         echo "=========================================="
         echo "ĐỊA CHỈ IP ĐỂ VÀO GAME MINDUSTRY:"
         cat pinggy.log | grep -o 'a.pinggy.io:[0-9]*' || cat pinggy.log
         echo "=========================================="
-
-        cd server
-        java -jar server.jar config autosave true &
-        java -jar server.jar host Ancient_Caldera survival
+        
+        # Giu workflow khong bi thoat
+        wait
