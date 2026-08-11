@@ -8,45 +8,38 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Download Mindustry Server Latest (Build 159)
+    - name: Download Mindustry Server Latest
       run: |
         mkdir server && cd server
-        # Lấy tự động link bản Latest Server Release chuẩn nhất từ GitHub
         LATEST_URL=$(curl -s https://api.github.com/repos/Anuken/Mindustry/releases/latest | grep "browser_download_url" | grep "server-release.jar" | cut -d '"' -f 4)
         wget -O server.jar "$LATEST_URL"
 
-    - name: Run Mindustry & Pinggy UDP Tunnel
+    - name: Run Server & Playit Tunnel
       run: |
+        # Tai playit binary
+        wget -O playit https://github.com/playit-cloud/playit-agent/releases/latest/download/playit-linux-amd64
+        chmod +x playit
+
+        # Run Mindustry Server
         cd server
-        # Chạy host tự động sinh map
         echo "host" > commands.txt
         echo "config autosave true" >> commands.txt
-        
         java -jar server.jar < commands.txt &
-        sleep 10
         cd ..
 
-        # Chạy SSH Pinggy UDP
-        ssh -o StrictHostKeyChecking=no -p 443 -R 0:127.0.0.1:6567 nKYs45w3a4n+udp@free.pinggy.io > pinggy.log 2>&1 &
-        sleep 10
+        # Chay playit tao claim url
+        ./playit --secret claim > playit.log 2>&1 &
+        sleep 5
 
+        # Automatic Claim Key Playit
+        CLAIM_URL=$(grep -o 'https://playit.gg/claim/[^ ]*' playit.log | head -n1)
+        
         echo "=========================================="
-        echo "LOG CHI TIẾT PINGGY:"
-        cat pinggy.log
-        echo "=========================================="
-
-        DOMAIN_PINGGY=$(grep -o '[a-z0-9-]*\.run\.pinggy-free\.link:[0-9]*' pinggy.log | head -n1)
-
-        if [ -z "$DOMAIN_PINGGY" ]; then
-          DOMAIN_PINGGY=$(grep -o '[a-z0-9-]*\.a\.pinggy\.io:[0-9]*' pinggy.log | head -n1)
-        fi
-
-        echo "=========================================="
-        echo "DOMAIN KẾT NỐI VÀO GAME:"
-        echo "$DOMAIN_PINGGY"
+        echo "LẦN ĐẦU CHẠY: CLICK LINK NÀY ĐỂ CLAIM TUNNEL (ĐÉO CẦN THẺ VISA):"
+        echo "$CLAIM_URL"
         echo "=========================================="
 
         while true; do
           sleep 60
-          echo "[KEEP-ALIVE] Server Mindustry active..."
+          echo "[KEEP-ALIVE] Server active..."
         done
