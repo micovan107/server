@@ -8,31 +8,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Download & Run Mindustry with Bore Tunnel
+    - name: Download Mindustry Server Latest
       run: |
         mkdir server && cd server
-        
-        # 1. Tải Mindustry Server Latest
         LATEST_URL=$(curl -s https://api.github.com/repos/Anuken/Mindustry/releases/latest | grep "browser_download_url" | grep "server-release.jar" | cut -d '"' -f 4)
         wget -O server.jar "$LATEST_URL"
-        
-        # 2. Tải Bore CLI
-        wget https://github.com/ekzhang/bore/releases/download/v0.5.0/bore-v0.5.0-x86_64-unknown-linux-musl.tar.gz
-        tar -xf bore-v0.5.0-x86_64-unknown-linux-musl.tar.gz
-        
-        # 3. Chạy Mindustry Server
-        echo "host" > commands.txt
+
+    - name: Run Mindustry & Pinggy UDP
+      run: |
+        cd server
+        # Config host map Fortress co dinh
+        echo "host Fortress survival" > commands.txt
         echo "config autosave true" >> commands.txt
         java -jar server.jar < commands.txt &
-        sleep 5
+        sleep 10
+        cd ..
 
-        # 4. Chạy Bore Forwarding Port 6567
-        ./bore local 6567 --to bore.pub > bore.log 2>&1 &
-        sleep 5
+        # Pinggy UDP Tunnel
+        ssh -o StrictHostKeyChecking=no -p 443 -R 0:127.0.0.1:6567 nKYs45w3a4n+udp@free.pinggy.io > pinggy.log 2>&1 &
+        sleep 10
 
         echo "=========================================="
-        echo "LOG KẾT NỐI BORE (LẤY IP VÀO GAME Ở ĐÂY):"
-        cat bore.log
+        echo "LOG PINGGY UDP:"
+        cat pinggy.log
+        echo "=========================================="
+
+        DOMAIN_PINGGY=$(grep -o '[a-z0-9-]*\.run\.pinggy-free\.link:[0-9]*' pinggy.log | head -n1)
+
+        echo "=========================================="
+        echo "IP/DOMAIN CHOI MINDUSTRY:"
+        echo "$DOMAIN_PINGGY"
         echo "=========================================="
 
         while true; do
