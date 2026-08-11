@@ -15,7 +15,7 @@ jobs:
 
     - name: Download Playit
       run: |
-        curl -SsL https://github.com/playit-cloud/playit-agent/releases/download/v0.9.3/playit-linux-amd64 -o playit
+        curl -sL https://playit.gg/downloads/playit-linux-amd64 -o playit
         chmod +x playit
 
     - name: Run Mindustry & Playit Auto Tunnel
