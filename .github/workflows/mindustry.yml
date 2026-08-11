@@ -8,22 +8,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Download Mindustry Server & Maps
+    - name: Download Mindustry Server Build 146
       run: |
         mkdir -p server/config/maps
         cd server
-        # Tải server jar v146
         wget -O server.jar https://github.com/Anuken/Mindustry/releases/download/v146/server-release.jar
         
-        # Tải file map Ancient Caldera chuẩn (.msav) thả thẳng vào thư mục maps
+        # Tải map từ mirror link raw chuẩn khác
         cd config/maps
-        wget -O Ancient_Caldera.msav https://raw.githubusercontent.com/Anuken/Mindustry/master/core/assets/maps/Ancient_Caldera.msav
+        wget -O test.msav https://raw.githubusercontent.com/Anuken/Mindustry/v146/core/assets/maps/ancientCaldera.msav || true
 
     - name: Run Mindustry & Pinggy UDP Tunnel
       run: |
         cd server
-        # Chạy server và host map Ancient_Caldera vừa tải
-        echo "host Ancient_Caldera survival" > commands.txt
+        # Tạo file lệnh host map
+        echo "reloadmaps" > commands.txt
+        echo "host ancientCaldera survival" >> commands.txt
         echo "config autosave true" >> commands.txt
         
         java -jar server.jar < commands.txt &
