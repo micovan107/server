@@ -15,7 +15,7 @@ jobs:
 
     - name: Download Playit
       run: |
-        curl -SsL https://playit-cloud.github.io/v0.4/pkg/bin/x86_64-unknown-linux-musl/playit -o playit
+        curl -SsL https://github.com/playit-cloud/playit-agent/releases/download/v0.9.3/playit-linux-amd64 -o playit
         chmod +x playit
 
     - name: Run Mindustry & Playit Auto Tunnel
@@ -29,18 +29,9 @@ jobs:
         ./playit > playit.log 2>&1 &
         sleep 10
 
-        # Lay claim URL neu chua link
-        CLAIM_URL=$(grep -o 'https://playit.gg/claim/[a-zA-Z0-9]*' playit.log | head -n1)
-
         echo "=========================================="
-        if [ -n "$CLAIM_URL" ]; then
-          echo "BƯỚC CHUẨN BỊ (CHỈ LÀM 1 LẦN DUY NHẤT):"
-          echo "Click vào link này để chấp nhận agent: $CLAIM_URL"
-          echo "Sau đó add tunnel Custom UDP -> port 6567"
-        else
-          echo "LOG PLAYIT:"
-          cat playit.log
-        fi
+        echo "LOG PLAYIT:"
+        cat playit.log
         echo "=========================================="
 
         wait
