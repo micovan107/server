@@ -13,45 +13,34 @@ jobs:
         mkdir server && cd server
         wget -O server.jar https://github.com/Anuken/Mindustry/releases/latest/download/server-release.jar
 
-    - name: Download FRP Client
+    - name: Download Playit
       run: |
-        wget https://github.com/fatedier/frp/releases/download/v0.58.0/frp_0.58.0_linux_amd64.tar.gz
-        tar -xf frp_0.58.0_linux_amd64.tar.gz
-        mv frp_0.58.0_linux_amd64 frp
+        curl -SsL https://playit-cloud.github.io/v0.4/pkg/bin/x86_64-unknown-linux-musl/playit -o playit
+        chmod +x playit
 
-    - name: Run Mindustry & FRP UDP Tunnel
+    - name: Run Mindustry & Playit Auto Tunnel
       run: |
         cd server
         java -jar server.jar config autosave true &
         java -jar server.jar host Ancient_Caldera survival &
         cd ..
 
-        # Tao port ngau nhien va file config FRP
-        RANDOM_PORT=$((RANDOM % 20000 + 30000))
-        cat <<EOF > frpc.toml
-        serverAddr = "free.vps.vc"
-        serverPort = 7000
+        # Chay playit ngam
+        ./playit > playit.log 2>&1 &
+        sleep 10
 
-        [[proxies]]
-        name = "mindustry-udp-$RANDOM_PORT"
-        type = "udp"
-        localIP = "127.0.0.1"
-        localPort = 6567
-        remotePort = $RANDOM_PORT
-        EOF
-
-        ./frp/frpc -c frpc.toml > frp.log 2>&1 &
-        sleep 8
-
-        # Lay IP so IPv4 cua server free.vps.vc
-        FRP_IP=$(getent ahosts free.vps.vc | awk '{print $1}' | head -n1)
+        # Lay claim URL neu chua link
+        CLAIM_URL=$(grep -o 'https://playit.gg/claim/[a-zA-Z0-9]*' playit.log | head -n1)
 
         echo "=========================================="
-        echo "LOG CHI TIẾT FRP:"
-        cat frp.log
-        echo "=========================================="
-        echo "ĐỊA CHỈ IP SỐ UDP ĐỂ VÀO GAME MINDUSTRY:"
-        echo "$FRP_IP:$RANDOM_PORT"
+        if [ -n "$CLAIM_URL" ]; then
+          echo "BƯỚC CHUẨN BỊ (CHỈ LÀM 1 LẦN DUY NHẤT):"
+          echo "Click vào link này để chấp nhận agent: $CLAIM_URL"
+          echo "Sau đó add tunnel Custom UDP -> port 6567"
+        else
+          echo "LOG PLAYIT:"
+          cat playit.log
+        fi
         echo "=========================================="
 
         wait
