@@ -13,26 +13,35 @@ jobs:
         mkdir server && cd server
         wget -O server.jar https://github.com/Anuken/Mindustry/releases/latest/download/server-release.jar
 
-    - name: Download Playit
+    - name: Run Mindustry & Pinggy UDP Tunnel
       run: |
-        PLAYIT_URL=$(curl -s https://api.github.com/repos/playit-cloud/playit-agent/releases/latest | grep "browser_download_url" | grep "linux-amd64" | cut -d '"' -f 4 | head -n1)
-        wget -O playit "$PLAYIT_URL"
-        chmod +x playit
-
-    - name: Run Mindustry & Playit Auto Tunnel
-      run: |
+        # Chạy Mindustry server trước
         cd server
         java -jar server.jar config autosave true &
         java -jar server.jar host Ancient_Caldera survival &
         cd ..
 
-        # Chay playit ngam
-        ./playit > playit.log 2>&1 &
+        # Mở tunnel UDP qua Pinggy (dùng SSH, không cần tải CLI hay tạo tài khoản)
+        ssh -o StrictHostKeyChecking=no -p 443 -R 0:127.0.0.1:6567 udp@a.pinggy.io > pinggy.log 2>&1 &
         sleep 10
 
         echo "=========================================="
-        echo "LOG PLAYIT:"
-        cat playit.log
+        echo "LOG CHI TIẾT PINGGY:"
+        cat pinggy.log
         echo "=========================================="
+
+        # Lấy domain/port UDP từ Pinggy
+        ENDPOINT=$(grep -o '[a-z0-9-]*\.a\.pinggy\.io:[0-9]*' pinggy.log | head -n1)
+
+        if [ -n "$ENDPOINT" ]; then
+          DOMAIN=$(echo $ENDPOINT | cut -d: -f1)
+          PORT=$(echo $ENDPOINT | cut -d: -f2)
+          IP_SO=$(getent ahosts $DOMAIN | awk '{print $1}' | head -n1)
+
+          echo "=========================================="
+          echo "ĐỊA CHỈ IP SỐ ĐỂ VÀO GAME MINDUSTRY:"
+          echo "$IP_SO:$PORT"
+          echo "=========================================="
+        fi
 
         wait
