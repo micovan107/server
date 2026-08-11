@@ -11,17 +11,16 @@ jobs:
     - name: Download Mindustry Server Build 146
       run: |
         mkdir server && cd server
-        # Tải thẳng bản build 146 / v146 release ổn định nhất
         wget -O server.jar https://github.com/Anuken/Mindustry/releases/download/v146/server-release.jar
 
     - name: Run Mindustry & Pinggy UDP Tunnel
       run: |
         cd server
-        # Tạo file script tự động gửi lệnh host cho server Mindustry
-        echo "host Frozen_Forest survival" > commands.txt
+        # Tạo map ngẫu nhiên kích thước 150x150 và host ngay
+        echo "host 150 150 survival" > commands.txt
         echo "config autosave true" >> commands.txt
         
-        # Chạy server với input từ file lệnh để đảm bảo server host map thành công
+        # Chạy server với file lệnh
         java -jar server.jar < commands.txt &
         sleep 10
         cd ..
