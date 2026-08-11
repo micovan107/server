@@ -8,32 +8,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Download Mindustry Server Latest
+    - name: Download & Run Mindustry with Bore Tunnel
       run: |
         mkdir server && cd server
+        
+        # 1. Tải Mindustry Server Latest
         LATEST_URL=$(curl -s https://api.github.com/repos/Anuken/Mindustry/releases/latest | grep "browser_download_url" | grep "server-release.jar" | cut -d '"' -f 4)
         wget -O server.jar "$LATEST_URL"
-
-    - name: Run Server & Playit Tunnel
-      run: |
-        # Tai playit binary
-        wget -O playit https://github.com/playit-cloud/playit-agent/releases/latest/download/playit-linux-amd64
-        chmod +x playit
-
-        # Run Mindustry Server
-        cd server
+        
+        # 2. Tải Bore CLI
+        wget https://github.com/ekzhang/bore/releases/download/v0.5.0/bore-v0.5.0-x86_64-unknown-linux-musl.tar.gz
+        tar -xf bore-v0.5.0-x86_64-unknown-linux-musl.tar.gz
+        
+        # 3. Chạy Mindustry Server
         echo "host" > commands.txt
         echo "config autosave true" >> commands.txt
         java -jar server.jar < commands.txt &
-        cd ..
+        sleep 5
 
-        # Chay playit va doi 5s cho in xong log
-        ./playit --secret claim > playit.log 2>&1 &
+        # 4. Chạy Bore Forwarding Port 6567
+        ./bore local 6567 --to bore.pub > bore.log 2>&1 &
         sleep 5
 
         echo "=========================================="
-        echo "FULL LOG PLAYIT (CLICK LINK CLAIM TRONG NÀY):"
-        cat playit.log
+        echo "LOG KẾT NỐI BORE (LẤY IP VÀO GAME Ở ĐÂY):"
+        cat bore.log
         echo "=========================================="
 
         while true; do
