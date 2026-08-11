@@ -8,10 +8,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Download Mindustry Server
+    - name: Download Mindustry Server Latest (Build 159+)
       run: |
         mkdir server && cd server
-        wget -O server.jar https://github.com/Anuken/Mindustry/releases/latest/download/server-release.jar
+        # Cao link tai file server-release.jar tu bản Release chính thức mới nhất
+        SERVER_URL=$(curl -s https://api.github.com/repos/Anuken/Mindustry/releases/latest | grep "browser_download_url" | grep "server-release.jar" | cut -d '"' -f 4)
+        wget -O server.jar "$SERVER_URL"
 
     - name: Run Mindustry & Pinggy UDP Tunnel
       run: |
@@ -20,7 +22,7 @@ jobs:
         java -jar server.jar host Ancient_Caldera survival &
         cd ..
 
-        # Chạy SSH Pinggy dùng token UDP chính chủ của ông
+        # Chạy SSH Pinggy dùng token UDP
         ssh -o StrictHostKeyChecking=no -p 443 -R 0:127.0.0.1:6567 nKYs45w3a4n+udp@free.pinggy.io > pinggy.log 2>&1 &
         sleep 10
 
@@ -29,17 +31,18 @@ jobs:
         cat pinggy.log
         echo "=========================================="
 
-        ENDPOINT=$(grep -o '[a-z0-9-]*\.a\.pinggy\.io:[0-9]*' pinggy.log | head -n1)
+        DOMAIN_PINGGY=$(grep -o '[a-z0-9-]*\.run\.pinggy-free\.link:[0-9]*' pinggy.log | head -n1)
 
-        if [ -n "$ENDPOINT" ]; then
-          DOMAIN=$(echo $ENDPOINT | cut -d: -f1)
-          PORT=$(echo $ENDPOINT | cut -d: -f2)
-          IP_SO=$(getent ahosts $DOMAIN | awk '{print $1}' | head -n1)
-
-          echo "=========================================="
-          echo "ĐỊA CHỈ IP SỐ ĐỂ VÀO GAME MINDUSTRY:"
-          echo "$IP_SO:$PORT"
-          echo "=========================================="
+        if [ -z "$DOMAIN_PINGGY" ]; then
+          DOMAIN_PINGGY=$(grep -o '[a-z0-9-]*\.a\.pinggy\.io:[0-9]*' pinggy.log | head -n1)
         fi
 
-        wait
+        echo "=========================================="
+        echo "CỐP CÁI DOMAIN NÀY DÁN THẲNG VÀO GAME MINDUSTRY:"
+        echo "$DOMAIN_PINGGY"
+        echo "=========================================="
+
+        while true; do
+          sleep 60
+          echo "[KEEP-ALIVE] Server Mindustry v159 vẫn đang chạy..."
+        done
