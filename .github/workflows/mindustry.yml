@@ -8,36 +8,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Download Mindustry Server Latest
+    - name: Get Playit Secret Key Automatically
       run: |
         mkdir server && cd server
+        
+        # 1. Tải Mindustry Server & Playit
         LATEST_URL=$(curl -s https://api.github.com/repos/Anuken/Mindustry/releases/latest | grep "browser_download_url" | grep "server-release.jar" | cut -d '"' -f 4)
         wget -O server.jar "$LATEST_URL"
+        wget -O playit https://github.com/playit-cloud/playit-agent/releases/latest/download/playit-linux-amd64
+        chmod +x playit
 
-    - name: Run Mindustry & Pinggy UDP
-      run: |
-        cd server
-        # Config host map Fortress co dinh
+        # 2. Chạy Server Mindustry
         echo "host Fortress survival" > commands.txt
         echo "config autosave true" >> commands.txt
         java -jar server.jar < commands.txt &
-        sleep 10
-        cd ..
+        sleep 5
 
-        # Pinggy UDP Tunnel
-        ssh -o StrictHostKeyChecking=no -p 443 -R 0:127.0.0.1:6567 nKYs45w3a4n+udp@free.pinggy.io > pinggy.log 2>&1 &
-        sleep 10
-
-        echo "=========================================="
-        echo "LOG PINGGY UDP:"
-        cat pinggy.log
-        echo "=========================================="
-
-        DOMAIN_PINGGY=$(grep -o '[a-z0-9-]*\.run\.pinggy-free\.link:[0-9]*' pinggy.log | head -n1)
+        # 3. Tạo Secret Key mới và in log
+        ./playit reset-secret || true
+        ./playit secret claim > playit.log 2>&1 &
+        sleep 8
 
         echo "=========================================="
-        echo "IP/DOMAIN CHOI MINDUSTRY:"
-        echo "$DOMAIN_PINGGY"
+        echo "1. MỞ LINK NÀY BẰNG TRÌNH DUYỆT ĐỂ CLAIM:"
+        grep -o 'https://playit.gg/claim/[^ ]*' playit.log || cat playit.log
+        echo "=========================================="
+        
+        sleep 15
+        
+        echo "=========================================="
+        echo "2. SECRET KEY CỦA ÔNG ĐÂY (COPY NGUYÊN DÒNG NÀY):"
+        cat playit.toml 2>/dev/null || cat ~/.config/playit/playit.toml 2>/dev/null || echo "Chưa claim link ở trên!"
         echo "=========================================="
 
         while true; do
