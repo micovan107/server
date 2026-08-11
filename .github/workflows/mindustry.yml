@@ -15,14 +15,13 @@ jobs:
 
     - name: Run Mindustry & Pinggy UDP Tunnel
       run: |
-        # Chạy Mindustry server trước
         cd server
         java -jar server.jar config autosave true &
         java -jar server.jar host Ancient_Caldera survival &
         cd ..
 
-        # Mở tunnel UDP qua Pinggy (dùng SSH, không cần tải CLI hay tạo tài khoản)
-        ssh -o StrictHostKeyChecking=no -p 443 -R 0:127.0.0.1:6567 udp@a.pinggy.io > pinggy.log 2>&1 &
+        # Chạy SSH Pinggy dùng token UDP chính chủ của ông
+        ssh -o StrictHostKeyChecking=no -p 443 -R 0:127.0.0.1:6567 nKYs45w3a4n+udp@free.pinggy.io > pinggy.log 2>&1 &
         sleep 10
 
         echo "=========================================="
@@ -30,7 +29,6 @@ jobs:
         cat pinggy.log
         echo "=========================================="
 
-        # Lấy domain/port UDP từ Pinggy
         ENDPOINT=$(grep -o '[a-z0-9-]*\.a\.pinggy\.io:[0-9]*' pinggy.log | head -n1)
 
         if [ -n "$ENDPOINT" ]; then
