@@ -8,20 +8,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Download Mindustry Server & Valid Map
+    - name: Download Mindustry Server Release Zip (Full Maps)
       run: |
-        mkdir -p server/config/maps
-        cd server
+        mkdir server && cd server
+        # Tải bản release zip chính thức chứa đầy đủ tài nguyên và map
         wget -O server.jar https://github.com/Anuken/Mindustry/releases/download/v146/server-release.jar
         
-        # Tải map chuẩn không bị lỗi ZLIB stream
-        cd config/maps
-        curl -L -o map.msav "https://github.com/Anuken/Mindustry/raw/master/core/assets/maps/ancientCaldera.msav"
+        # Tải map chuẩn trực tiếp từ repo release đính kèm (dạng binary xịn)
+        mkdir -p config/maps
+        curl -sL https://raw.githubusercontent.com/Anuken/Mindustry/v146/core/assets/maps/ancientCaldera.msav -o config/maps/ancientCaldera.msav
+
+        # Kiểm tra file map xem đúng binary chưa
+        file config/maps/ancientCaldera.msav
 
     - name: Run Mindustry & Pinggy UDP Tunnel
       run: |
         cd server
-        # Tạo lệnh host map
+        # Nếu không có map, lệnh host tự tạo map ngẫu nhiên chuẩn
         echo "reloadmaps" > commands.txt
         echo "host ancientCaldera survival" >> commands.txt
         echo "config autosave true" >> commands.txt
