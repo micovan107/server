@@ -15,8 +15,7 @@ jobs:
 
     - name: Download Playit
       run: |
-        # Cao link tai file binary playit-linux-amd64 tu ban release moi nhat
-        PLAYIT_URL=$(curl -s https://api.github.com/repos/playit-cloud/playit-agent/releases/latest | grep "browser_download_url" | grep "linux-amd64" | cut -d '"' -f 4)
+        PLAYIT_URL=$(curl -s https://api.github.com/repos/playit-cloud/playit-agent/releases/latest | grep "browser_download_url" | grep "linux-amd64" | cut -d '"' -f 4 | head -n1)
         wget -O playit "$PLAYIT_URL"
         chmod +x playit
 
