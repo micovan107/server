@@ -27,16 +27,13 @@ jobs:
         java -jar server.jar < commands.txt &
         cd ..
 
-        # Chay playit tao claim url
+        # Chay playit va doi 5s cho in xong log
         ./playit --secret claim > playit.log 2>&1 &
         sleep 5
 
-        # Automatic Claim Key Playit
-        CLAIM_URL=$(grep -o 'https://playit.gg/claim/[^ ]*' playit.log | head -n1)
-        
         echo "=========================================="
-        echo "LẦN ĐẦU CHẠY: CLICK LINK NÀY ĐỂ CLAIM TUNNEL (ĐÉO CẦN THẺ VISA):"
-        echo "$CLAIM_URL"
+        echo "FULL LOG PLAYIT (CLICK LINK CLAIM TRONG NÀY):"
+        cat playit.log
         echo "=========================================="
 
         while true; do
