@@ -16,16 +16,17 @@ jobs:
     - name: Run Mindustry & Pinggy UDP Tunnel
       run: |
         cd server
-        # Tạo map ngẫu nhiên kích thước 150x150 và host ngay
-        echo "host 150 150 survival" > commands.txt
+        # Tao file map custom va host map do
+        echo "genmap custom survival hex" > commands.txt
+        echo "host custom survival" >> commands.txt
         echo "config autosave true" >> commands.txt
         
-        # Chạy server với file lệnh
+        # Chay server
         java -jar server.jar < commands.txt &
         sleep 10
         cd ..
 
-        # Chạy SSH Pinggy UDP
+        # Chay SSH Pinggy UDP
         ssh -o StrictHostKeyChecking=no -p 443 -R 0:127.0.0.1:6567 nKYs45w3a4n+udp@free.pinggy.io > pinggy.log 2>&1 &
         sleep 10
 
