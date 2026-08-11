@@ -8,15 +8,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Download Mindustry Server
+    - name: Download Mindustry Server Latest (Build 159)
       run: |
         mkdir server && cd server
-        wget -O server.jar https://github.com/Anuken/Mindustry/releases/download/v146/server-release.jar
+        # Lấy tự động link bản Latest Server Release chuẩn nhất từ GitHub
+        LATEST_URL=$(curl -s https://api.github.com/repos/Anuken/Mindustry/releases/latest | grep "browser_download_url" | grep "server-release.jar" | cut -d '"' -f 4)
+        wget -O server.jar "$LATEST_URL"
 
     - name: Run Mindustry & Pinggy UDP Tunnel
       run: |
         cd server
-        # Dùng lệnh host mặc định (hoặc host 1) để server tự lấy map dựng sẵn / sinh map
+        # Chạy host tự động sinh map
         echo "host" > commands.txt
         echo "config autosave true" >> commands.txt
         
